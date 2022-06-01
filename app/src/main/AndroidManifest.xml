@@ -18,7 +18,10 @@
         <service
             android:name=".RecordService"
             android:process=":recordServiceProcess"
-            android:foregroundServiceType="mediaProjection"/>
+            android:enabled="true"
+            android:exported="true"
+            android:stopWithTask="true"
+            android:foregroundServiceType="mediaProjection" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

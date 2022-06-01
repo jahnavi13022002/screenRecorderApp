@@ -1,7 +1,11 @@
 package com.ms_debug.screenrecorder;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -77,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
     private void startRecordingService(int resultCode, Intent data){
         Intent intent = RecordService.newIntent(this, resultCode, data);
         Log.v(TAG, "starting service");
-        startService(intent);
+        startForegroundService(intent);
     }
 
     private void stopRecordingService(){

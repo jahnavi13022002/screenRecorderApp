@@ -21,6 +21,8 @@ import android.view.Surface;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
+
 import java.io.IOException;
 
 import static android.app.Activity.RESULT_OK;
@@ -60,20 +62,34 @@ public final class RecordService extends Service {
         intent.putExtra(EXTRA_DATA, data);
         return intent;
     }
+
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = getString(R.string.channel_name);
-            String description = getString(R.string.channel_description);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("123", name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
+        CharSequence name = getString(R.string.channel_name);
+        String description = getString(R.string.channel_description);
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+
+        // Register the channel with the system; you can't change the importance
+        // or other notification behaviors after this
+        final String CHANNEL_ID = "123";
+        final String TAG_NOTIFICATION = getString(R.string.app_name);
+        NotificationChannel channel =
+            new NotificationChannel(
+                CHANNEL_ID, name, importance);
+        channel.setDescription(description);
+        NotificationManager notificationManager =
+            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.createNotificationChannel(channel);
+
+        Notification.Builder builder =
+            new Notification.Builder(this, CHANNEL_ID)
+                .setContentTitle(name)
+                .setContentText(description)
+                .setSmallIcon(R.drawable.ic_launcher_background)
+                .setAutoCancel(false);
+
+        notificationManager.notify(TAG_NOTIFICATION, 1, builder.build());
     }
 
     public class MyBroadcastReceiver extends BroadcastReceiver {
@@ -104,32 +120,14 @@ public final class RecordService extends Service {
         public void handleMessage(Message msg) {
             if (resultCode == RESULT_OK) {
                 startRecording(resultCode, data);
-            }else{
             }
         }
     }
 
     @Override
     public void onCreate() {
-        // run this service as foreground service to prevent it from getting killed
-        // when the main app is being closed
-//        Intent notificationIntent =  new Intent(this, RecordService.class);
-//        PendingIntent pendingIntent =
-//                PendingIntent.getActivity(this, 0, notificationIntent, 0);
-//
-//        Notification notification =
-//                new Notification.Builder(this)
-//                        .setContentTitle("DataRecorder")
-//                        .setContentText("Your screen is being recorded and saved to your phone.")
-//                        .setSmallIcon(R.mipmap.ic_launcher)
-//                        .setContentIntent(pendingIntent)
-//                        .setTicker("Tickertext")
-//                        .build();
-//
-//        startForeground(ONGOING_NOTIFICATION_ID, notification);
-        createNotificationChannel();
-
         // register receiver to check if the phone screen is on or off
+        createNotificationChannel();
         mScreenStateReceiver = new MyBroadcastReceiver();
         IntentFilter screenStateFilter = new IntentFilter();
         screenStateFilter.addAction(Intent.ACTION_SCREEN_ON);
@@ -148,7 +146,6 @@ public final class RecordService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Toast.makeText(this, "Starting recording service", Toast.LENGTH_SHORT).show();
-
         resultCode = intent.getIntExtra(EXTRA_RESULT_CODE, 0);
         data = intent.getParcelableExtra(EXTRA_DATA);
 
