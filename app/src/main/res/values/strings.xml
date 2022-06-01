@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SCREEN RECORDER</string>
+    <string name="channel_description">recording screen</string>
+    <string name="channel_name">recorder</string>
+</resources>
