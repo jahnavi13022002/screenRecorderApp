@@ -9,6 +9,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ServiceInfo;
 import android.hardware.display.VirtualDisplay;
 import android.media.MediaRecorder;
 import android.media.projection.MediaProjection;
@@ -82,14 +83,17 @@ public final class RecordService extends Service {
             (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.createNotificationChannel(channel);
 
-        Notification.Builder builder =
-            new Notification.Builder(this, CHANNEL_ID)
-                .setContentTitle(name)
-                .setContentText(description)
-                .setSmallIcon(R.drawable.ic_launcher_background)
-                .setAutoCancel(false);
+        // notificationManager.notify(TAG_NOTIFICATION, 1, builder.build());
 
-        notificationManager.notify(TAG_NOTIFICATION, 1, builder.build());
+        Notification notification = new Notification.
+            Builder(getApplicationContext(), CHANNEL_ID)
+            .setOngoing(true)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setCategory(Notification.CATEGORY_SERVICE)
+            .setContentTitle(name)
+            .build();
+
+        startForeground(12312, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION);
     }
 
     public class MyBroadcastReceiver extends BroadcastReceiver {
